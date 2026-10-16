@@ -1,0 +1,58 @@
+name: Terraform Apply
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "terraform/**"
+  workflow_dispatch:
+
+permissions:
+  id-token: write # needed for OIDC login to Azure
+  contents: read
+
+env:
+  ARM_USE_OIDC: "true"
+  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+defaults:
+  run:
+    working-directory: terraform
+
+jobs:
+  deploy-dev:
+    name: Deploy to dev
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: |
+          terraform init -input=false \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="key=dev.tfstate"
+
+      - name: Terraform apply
+        run: terraform apply -input=false -auto-approve -var-file=environments/dev.tfvars
+
+  deploy-prod:
+    name: Deploy to prod
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: prod # has "required reviewers", so the job pauses here until approved
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init
+        run: |
+          terraform init -input=false \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="key=prod.tfstate"
+
+      - name: Terraform apply
+        run: terraform apply -input=false -auto-approve -var-file=environments/prod.tfvars

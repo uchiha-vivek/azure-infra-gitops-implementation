@@ -1,0 +1,13 @@
+framework:
+  - terraform
+
+# Checks we have consciously accepted for this low-cost demo. Everything not
+# listed here fails the pipeline. Add a reason for every entry.
+skip-check:
+  - CKV_AZURE_33  # Queue service is unused; enabling its logging adds data-plane calls to every apply
+  - CKV_AZURE_59  # Public network access; locking it down needs private endpoints + self-hosted runners
+  - CKV_AZURE_206 # LRS replication; GRS/ZRS costs more
+  - CKV2_AZURE_1  # Customer-managed encryption keys need Key Vault (out of scope)
+  - CKV2_AZURE_33 # Private endpoint for storage (out of scope)
+  - CKV2_AZURE_40 # Shared key access stays on; the provider uses it for data-plane reads
+  - CKV2_AZURE_41 # SAS expiration policy (no SAS tokens are issued)
