@@ -99,3 +99,11 @@ For deleting everything, run below command
 ```bash
 ./scripts/teardown.sh
 ```
+
+
+## Understanding different resources
+
+
+1. [Understanding Gitops](https://www.redhat.com/en/topics/devops/what-is-gitops)
+2. [What are CI/CD Pipelines](https://www.redhat.com/en/topics/devops/what-cicd-pipeline?percmp=RHCTG0260000495937)
+3. [Understanding Terraform](https://developer.hashicorp.com/terraform)
